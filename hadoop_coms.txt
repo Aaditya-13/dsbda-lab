@@ -1,0 +1,186 @@
+# ================================
+# START HADOOP SERVICES
+# ================================
+
+start-dfs.sh
+start-yarn.sh
+
+# Check Hadoop daemons
+jps
+
+
+# ================================
+# CREATE PROJECT DIRECTORY
+# ================================
+
+mkdir loginproject
+
+cd loginproject
+
+
+# ================================
+# CREATE INPUT LOG FILE
+# ================================
+
+nano login_logs.txt
+
+# Paste this data inside:
+
+# Aadi,0900,1100
+# Rahul,1000,1045
+# Aadi,1200,1330
+# Neha,0800,0915
+# Rahul,1400,1600
+
+# Save:
+# CTRL + O
+# ENTER
+# CTRL + X
+
+
+# ================================
+# CREATE MAPPER FILE
+# ================================
+
+nano LoginMapper.java
+
+
+# ================================
+# CREATE REDUCER FILE
+# ================================
+
+nano LoginReducer.java
+
+
+# ================================
+# CREATE DRIVER FILE
+# ================================
+
+nano LoginDriver.java
+
+
+# ================================
+# CHECK FILES
+# ================================
+
+ls
+
+
+# ================================
+# COMPILE JAVA FILES
+# ================================
+
+javac -classpath $(hadoop classpath) *.java
+
+
+# ================================
+# CHECK GENERATED .class FILES
+# ================================
+
+ls
+
+
+# ================================
+# CREATE JAR FILE
+# ================================
+
+jar cf loginDuration.jar *.class
+
+
+# ================================
+# VERIFY JAR FILE
+# ================================
+
+ls
+
+
+# ================================
+# CREATE HDFS INPUT DIRECTORY
+# ================================
+
+hdfs dfs -mkdir -p /assignment2/input
+
+
+# ================================
+# UPLOAD INPUT FILE TO HDFS
+# ================================
+
+hdfs dfs -put login_logs.txt /assignment2/input
+
+
+# If file already exists use:
+
+hdfs dfs -put -f login_logs.txt /assignment2/input
+
+
+# ================================
+# VERIFY FILE IN HDFS
+# ================================
+
+hdfs dfs -ls /assignment2/input
+
+
+# ================================
+# REMOVE OLD OUTPUT DIRECTORY
+# (VERY IMPORTANT BEFORE RUNNING JOB AGAIN)
+# ================================
+
+hdfs dfs -rm -r /assignment2/output
+
+
+# ================================
+# RUN HADOOP MAPREDUCE JOB
+# ================================
+
+hadoop jar loginDuration.jar LoginDriver \
+/assignment2/input /assignment2/output
+
+
+# ================================
+# VIEW OUTPUT
+# ================================
+
+hdfs dfs -cat /assignment2/output/part-r-00000
+
+
+# ================================
+# CHECK OUTPUT DIRECTORY
+# ================================
+
+hdfs dfs -ls /assignment2/output
+
+
+# ================================
+# DOWNLOAD OUTPUT TO LOCAL SYSTEM (OPTIONAL)
+# ================================
+
+hdfs dfs -get /assignment2/output/part-r-00000
+
+
+# ================================
+# DELETE INPUT DIRECTORY (OPTIONAL)
+# ================================
+
+hdfs dfs -rm -r /assignment2/input
+
+
+# ================================
+# DELETE OUTPUT DIRECTORY (OPTIONAL)
+# ================================
+
+hdfs dfs -rm -r /assignment2/output
+
+
+# ================================
+# STOP HADOOP SERVICES
+# ================================
+
+stop-yarn.sh
+stop-dfs.sh
+
+
+# ================================
+# VERIFY SERVICES STOPPED
+# ================================
+
+jps

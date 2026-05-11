@@ -1,0 +1,327 @@
+```bash
+# START HADOOP
+
+start-dfs.sh
+start-yarn.sh
+
+# IF SAFE MODE ERROR OCCURS
+
+hdfs dfsadmin -safemode leave
+
+# START HIVE
+
+hive
+
+
+-- =====================================================
+-- SHOW DATABASES
+-- =====================================================
+
+SHOW DATABASES;
+
+
+-- =====================================================
+-- DROP OLD TABLES
+-- =====================================================
+
+DROP TABLE IF EXISTS flights;
+DROP TABLE IF EXISTS airline;
+DROP TABLE IF EXISTS passenger;
+DROP TABLE IF EXISTS airport;
+
+
+-- =====================================================
+-- CREATE TABLES
+-- =====================================================
+
+CREATE EXTERNAL TABLE flights(
+id INT,
+airline STRING,
+source STRING,
+destination STRING,
+delay INT,
+fdate STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+LOCATION '/user/hive/flights';
+
+
+CREATE EXTERNAL TABLE airline(
+airline STRING,
+owner STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+LOCATION '/user/hive/airline';
+
+
+CREATE EXTERNAL TABLE passenger(
+pid INT,
+pname STRING,
+airline STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+LOCATION '/user/hive/passenger';
+
+
+CREATE EXTERNAL TABLE airport(
+airportid INT,
+city STRING,
+state STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+LOCATION '/user/hive/airport';
+
+
+-- =====================================================
+-- INSERT COMMANDS (THEORY / PRACTICAL WRITING)
+-- =====================================================
+
+INSERT INTO flights VALUES
+(1,'Indigo','Mumbai','Delhi',10,'2008-01-01'),
+(2,'AirIndia','Pune','Delhi',20,'2008-01-01'),
+(3,'SpiceJet','Mumbai','Bangalore',15,'2008-01-02'),
+(4,'Vistara','Delhi','Chennai',25,'2008-01-02'),
+(5,'Indigo','Mumbai','Hyderabad',30,'2008-01-03'),
+(6,'AirIndia','Delhi','Kolkata',18,'2008-01-03');
+
+
+INSERT INTO airline VALUES
+('Indigo','InterGlobe'),
+('AirIndia','TATA'),
+('SpiceJet','SpiceJet Ltd'),
+('Vistara','TATA'),
+('GoAir','Wadia'),
+('Akasa','SNV');
+
+
+INSERT INTO passenger VALUES
+(101,'Aadi','Indigo'),
+(102,'Rahul','AirIndia'),
+(103,'Neha','SpiceJet'),
+(104,'Riya','Vistara'),
+(105,'Kunal','Indigo'),
+(106,'Aman','AirIndia');
+
+
+INSERT INTO airport VALUES
+(1,'Mumbai','Maharashtra'),
+(2,'Delhi','Delhi'),
+(3,'Pune','Maharashtra'),
+(4,'Bangalore','Karnataka'),
+(5,'Chennai','TamilNadu'),
+(6,'Kolkata','WestBengal');
+
+
+-- =====================================================
+-- EXIT HIVE
+-- =====================================================
+
+exit;
+
+
+
+# =====================================================
+# CREATE FLIGHTS DATA FILE
+# =====================================================
+
+nano flights.txt
+
+
+# PASTE THIS DATA
+
+1,Indigo,Mumbai,Delhi,10,2008-01-01
+2,AirIndia,Pune,Delhi,20,2008-01-01
+3,SpiceJet,Mumbai,Bangalore,15,2008-01-02
+4,Vistara,Delhi,Chennai,25,2008-01-02
+5,Indigo,Mumbai,Hyderabad,30,2008-01-03
+6,AirIndia,Delhi,Kolkata,18,2008-01-03
+
+
+# SAVE:
+# CTRL + O
+# ENTER
+# CTRL + X
+
+
+
+# =====================================================
+# CREATE AIRLINE DATA FILE
+# =====================================================
+
+nano airline.txt
+
+
+# PASTE THIS DATA
+
+Indigo,InterGlobe
+AirIndia,TATA
+SpiceJet,SpiceJet Ltd
+Vistara,TATA
+GoAir,Wadia
+Akasa,SNV
+
+
+# SAVE:
+# CTRL + O
+# ENTER
+# CTRL + X
+
+
+
+# =====================================================
+# CREATE PASSENGER DATA FILE
+# =====================================================
+
+nano passenger.txt
+
+
+# PASTE THIS DATA
+
+101,Aadi,Indigo
+102,Rahul,AirIndia
+103,Neha,SpiceJet
+104,Riya,Vistara
+105,Kunal,Indigo
+106,Aman,AirIndia
+
+
+# SAVE:
+# CTRL + O
+# ENTER
+# CTRL + X
+
+
+
+# =====================================================
+# CREATE AIRPORT DATA FILE
+# =====================================================
+
+nano airport.txt
+
+
+# PASTE THIS DATA
+
+1,Mumbai,Maharashtra
+2,Delhi,Delhi
+3,Pune,Maharashtra
+4,Bangalore,Karnataka
+5,Chennai,TamilNadu
+6,Kolkata,WestBengal
+
+
+# SAVE:
+# CTRL + O
+# ENTER
+# CTRL + X
+
+
+
+# =====================================================
+# UPLOAD FILES TO HDFS
+# =====================================================
+
+hdfs dfs -mkdir -p /user/hive/flights
+hdfs dfs -mkdir -p /user/hive/airline
+hdfs dfs -mkdir -p /user/hive/passenger
+hdfs dfs -mkdir -p /user/hive/airport
+
+
+hdfs dfs -put -f flights.txt /user/hive/flights
+
+hdfs dfs -put -f airline.txt /user/hive/airline
+
+hdfs dfs -put -f passenger.txt /user/hive/passenger
+
+hdfs dfs -put -f airport.txt /user/hive/airport
+
+
+
+# =====================================================
+# OPEN HIVE AGAIN
+# =====================================================
+
+hive
+
+
+-- =====================================================
+-- SHOW TABLES
+-- =====================================================
+
+SHOW TABLES;
+
+
+-- =====================================================
+-- VIEW TABLE DATA
+-- =====================================================
+
+SELECT * FROM flights;
+
+SELECT * FROM airline;
+
+SELECT * FROM passenger;
+
+SELECT * FROM airport;
+
+
+-- =====================================================
+-- ADD COLUMN
+-- =====================================================
+
+ALTER TABLE flights
+ADD COLUMNS(status STRING);
+
+
+-- =====================================================
+-- JOIN QUERY
+-- =====================================================
+
+SELECT p.pname,
+p.airline,
+a.owner
+FROM passenger p
+JOIN airline a
+ON(p.airline=a.airline);
+
+
+-- =====================================================
+-- CREATE INDEX
+-- =====================================================
+
+CREATE INDEX idx
+ON TABLE flights(airline)
+AS 'COMPACT'
+WITH DEFERRED REBUILD;
+
+ALTER INDEX idx
+ON flights REBUILD;
+
+
+-- =====================================================
+-- AVERAGE DELAY QUERY
+-- =====================================================
+
+SELECT fdate,
+AVG(delay)
+FROM flights
+GROUP BY fdate;
+
+
+-- =====================================================
+-- EXIT HIVE
+-- =====================================================
+
+exit;
+
+
+
+# =====================================================
+# STOP HADOOP
+# =====================================================
+
+stop-yarn.sh
+stop-dfs.sh
+```
