@@ -1,0 +1,65 @@
+assignment 6
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Make plots look better
+sns.set(style="whitegrid")
+
+air = pd.read_csv("AirQualityUCI.csv", sep=';', decimal=',')
+heart = pd.read_csv("heart.csv")
+
+air.head()
+
+air.replace(-200, np.nan, inplace=True)
+air.fillna(air.mean(numeric_only=True), inplace=True)
+
+# Clean Heart dataset
+heart.fillna(heart.mean(numeric_only=True), inplace=True)
+
+plt.figure(figsize=(8,5))
+plt.plot(air['PT08.S1(CO)'][:100])
+plt.title("CO Sensor Readings Over Time")
+plt.xlabel("Index")
+plt.ylabel("CO Level")
+plt.show()
+
+plt.figure(figsize=(8,5))
+plt.hist(air['PT08.S1(CO)'], bins=30)
+plt.title("Distribution of CO Levels")
+plt.show()
+
+plt.figure(figsize=(8,5))
+sns.boxplot(x=air['PT08.S1(CO)'])
+plt.title("Boxplot of CO Levels")
+plt.show()
+
+plt.figure(figsize=(10,6))
+sns.heatmap(air.corr(numeric_only=True), cmap='coolwarm')
+plt.title("Air Quality Correlation Heatmap")
+plt.show()
+
+plt.figure(figsize=(6,4))
+sns.countplot(x=heart['target'])
+plt.title("Heart Disease Count (0 = No, 1 = Yes)")
+plt.show()
+
+plt.figure(figsize=(8,5))
+sns.histplot(heart['age'], bins=20, kde=True)
+plt.title("Age Distribution")
+plt.show()
+
+plt.figure(figsize=(8,5))
+sns.scatterplot(x=heart['age'], y=heart['chol'], hue=heart['target'])
+plt.title("Age vs Cholesterol")
+plt.show()
+
+plt.figure(figsize=(8,5))
+sns.boxplot(x=heart['target'], y=heart['chol'])
+plt.title("Cholesterol vs Heart Disease")
+plt.show()
+
+sns.pairplot(heart[['age','chol','thalach','target']], hue='target')
+plt.show()

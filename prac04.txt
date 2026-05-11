@@ -1,0 +1,33 @@
+assignment 4
+import pandas as pd
+import numpy as np
+
+df = pd.read_csv("dataset_Facebook.csv", sep=';')
+
+print(df.head())
+
+print(df.info())
+
+print(df.describe())
+
+subset = df[['Type', 'Category', 'like', 'share']]
+print(subset.head())
+subset2 = df[df['like'] > 200]
+subset2.head()
+
+data2 = df[['Type', 'comment']].head(50)
+merged = pd.merge(subset, data2, on='Type')
+print(merged.head())
+
+pivot_table = df.pivot_table(values='like', index='Type', columns='Category')
+pivot_table
+
+melted = pd.melt(df[['Type', 'like', 'comment']], id_vars=['Type'])
+melted.head(10)
+
+sorted_data = df.sort_values(by='like', ascending=False)
+print(sorted_data.head())
+
+print(df.head().T)
+
+print(df.shape)

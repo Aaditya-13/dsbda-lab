@@ -1,0 +1,51 @@
+scrapper 
+
+# Import Libraries
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+
+url = "https://webscraper.io/test-sites/e-commerce/static/computers/laptops"
+
+response = requests.get(url)
+
+print(response.status_code)
+
+soup = BeautifulSoup(response.text, "html.parser")
+
+products = soup.find_all("div", class_="thumbnail")
+
+print(len(products))
+
+data = []
+
+for product in products:
+
+    try:
+        name = product.find("a", class_="title").text.strip()
+    except:
+        name = "N/A"
+
+    try:
+        price = product.find("h4", class_="price").text.strip()
+    except:
+        price = "N/A"
+
+    try:
+        rating = product.find("p", attrs={"data-rating": True})["data-rating"]
+    except:
+        rating = "N/A"
+
+    try:
+        review = product.find("p", class_="review-count").text.strip()
+    except:
+        review = "N/A"
+
+    data.append([name, price, rating, review])
+
+df = pd.DataFrame(
+    data,
+    columns=["Product name", "price", "rating", "review"]
+)
+
+df.head(6)

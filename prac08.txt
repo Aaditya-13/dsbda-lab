@@ -1,0 +1,69 @@
+assignment 8
+
+# Create Spark Session
+from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.appName("DSBDA").getOrCreate()
+
+print("Spark Started")
+
+iris = spark.read.csv(
+    "/content/iris.csv",
+    header=True,
+    inferSchema=True
+)
+
+iris.show(5)
+iris.printSchema()
+
+iris = iris.dropna()
+
+iris.dropDuplicates().show()
+
+print("Total Rows :", iris.count())
+
+iris.describe().show()
+
+iris.createOrReplaceTempView("iris_table")
+
+spark.sql("""
+SELECT species,
+AVG(sepal_length) AS avg_length
+FROM iris_table
+GROUP BY species
+""").show()
+
+iris.groupBy("species").count().show()
+
+air = spark.read.csv(
+    "/content/AirQualityUCI.csv",
+    header=True,
+    inferSchema=True,
+    sep=";"
+)
+
+air.show(5)
+
+air = air.drop("_c15", "_c16")
+
+for col in air.columns:
+    new_col = col.replace(".", "_")                  .replace("(", "_")                  .replace(")", "")
+
+    air = air.withColumnRenamed(col, new_col)
+
+air.describe().show()
+
+air.createOrReplaceTempView("air_table")
+
+spark.sql("""
+SELECT AVG(NOx_GT) AS Average_NOx
+FROM air_table
+""").show()
+
+from pyspark.sql.functions import max, min, avg
+
+air.select(
+    max("NOx_GT"),
+    min("NOx_GT"),
+    avg("NOx_GT")
+).show()
